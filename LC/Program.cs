@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace LC
 {
@@ -6,13 +7,16 @@ namespace LC
     {
         static void Main(string[] args)
         {
-            NewLinkedList myLinkedList = new NewLinkedList();
+            ListNode list = new ListNode(1);
+            new Solution().RemoveNthFromEnd(list, 1);
+            MyL myLinkedList = new MyL();
             myLinkedList.AddAtHead(1);
-            myLinkedList.AddAtTail(2);
             myLinkedList.AddAtTail(3);
-            myLinkedList.AddAtTail(4);
-            myLinkedList.AddAtTail(5);
-            while(true)
+            myLinkedList.AddAtIndex(1, 2);
+            myLinkedList.Get(1);
+            myLinkedList.DeleteAtIndex(1);
+            myLinkedList.Get(1);
+            while (true)
             {
                 Console.WriteLine("Enter what u wannt!");
                 Console.WriteLine("1: print");
@@ -22,7 +26,7 @@ namespace LC
                 Console.WriteLine("5: Delete At index");
                 Console.WriteLine("6: Clear screen");
                 Console.WriteLine("7: Exit");
-                var ss = int.TryParse(Console.ReadLine(),out int key);
+                var ss = int.TryParse(Console.ReadLine(), out int key);
                 if (key == 1)
                 {
                     myLinkedList.Print();
@@ -39,7 +43,7 @@ namespace LC
                     var rs = int.TryParse(Console.ReadLine(), out int data);
                     Console.Write("Index : ");
                     rs = int.TryParse(Console.ReadLine(), out int index);
-                    myLinkedList.AddAtIndex(index,data);
+                    myLinkedList.AddAtIndex(index, data);
                 }
                 else if (key == 5)
                 {
@@ -53,222 +57,105 @@ namespace LC
                     var rs = int.TryParse(Console.ReadLine(), out int data);
                     myLinkedList.AddAtHead(data);
                 }
-                else  if (key == 6)
+                else if (key == 6)
                 {
                     Console.Clear();
                 }
-                else 
+                else
                 {
                     break;
                 }
             }
         }
     }
-    class MyLinkedList
+    public class ListNode
     {
-        public MyLinkedList()
+        public int val;
+        public ListNode next;
+        public ListNode(int x)
         {
-            Count = 0;
+            val = x;
+            next = null;
         }
-        public Node Head { get; set; }
-        public int Count { get; set; }
-        public void AddAtHead(int val)
+    }
+    public class Solution
+    {
+        public ListNode GetIntersectionNode(ListNode headA, ListNode headB)
         {
-            var node = new Node(val);
-            node.Next = Head;
-            Head = node;
-            Count++;
+            var listA = new List<ListNode>();
+            var listB = new List<ListNode>();
+            var tempA = headA;
+            var tempB = headB;
+            while (tempA!=null)
+            {
+                listA.Insert(0,tempA);
+                tempA = tempA.next;
+            }
+            while (tempB != null)
+            {
+                listB.Insert(0,tempB);
+                tempB = tempB.next;
+            }
+            if (listA.Count == 0 || listB.Count == 0) return null;
+            var i = 0;
+            while (i < listA.Count && i < listB.Count && listA[i] ==listB[i])
+            {
+                i++;
+            }
+            if (i == 0) return null;
+            return listA[i - 1];
         }
-        public void AddAtTail(int val)
+        public ListNode GetIntersectionNode2(ListNode headA, ListNode headB)
         {
-            var node = new Node(val);
-            if (Head == null)
+            var pA = headA;
+            var pB = headB;
+            while (pA != pB)
             {
-                Head = node;
-                return;
+                pA = pA == null ? headB : pA.next;
+                pB = pB == null ? headA : pB.next;
             }
-            var lsNote = GetLastNode();
-            lsNote.Next = node;
-            Count++;
+            return pA;
         }
-        public void AddAtIndex(int index, int val)
+        public ListNode RemoveNthFromEnd(ListNode head, int n)
         {
-            if(index == 0)
+            var cur = head;
+            var list = new List<ListNode>();
+            while (cur != null)
             {
-                AddAtHead(val);
+                list.Add(cur);
+                cur = cur.next;
             }
-            else if(index == Count)
+            if (n < 0 || list.Count < n) return head;
+            if(list.Count - n - 1 < 0)
             {
-                AddAtTail(val);
+                head = head.next;
+                return head;
             }
-            else
+            var temp = list[list.Count - n-1];
+            temp.next = temp.next.next;
+            return head;
+        }
+        public ListNode RemoveNthFromEnd2(ListNode head, int n)
+        {
+            var pa = head;
+            while (true)
             {
-                var i = 0;
-                var current = Head;
-                /// 2
-                while (i < index  -1)
+                var temp = pa;
+                for (int i = 0; i <= n ; i++)
                 {
-                    current = current.Next;
-                    i++;
+                    if (temp == null)
+                    {
+                        head = head.next; return head;
+                    }
+                    temp = temp.next;
                 }
-                var node = new Node(val);
-                var next = current.Next;
-                var pre = current;
-                pre.Next = node;
-                node.Next = next;
-                Count++;
+                if(temp == null)
+                {
+                    pa.next = pa.next.next;
+                    return head;
+                }
+                pa = pa.next;
             }
-        }
-        public void DeleteAtIndex(int index)
-        {
-            if(index == 0)
-            {
-                Head = Head.Next;
-                Count--;
-                return;
-            }
-            
-            var i = 0;
-            var current = Head;
-            /// 2
-            while (i < index -1)
-            {
-                current = current.Next;
-                i++;
-            }
-            var next = current.Next.Next;
-            current.Next = next;
-            Count--;
-        }
-        public int Get(int index)
-        {
-            if (index < 0 || index >= Count)
-            {
-                return -1;
-            }
-            var i = 0;
-            var current = Head;
-            /// 2
-            while (i < index)
-            {
-                current = current.Next;
-                i++;
-            }
-            return current.Value;
-        }
-        Node GetLastNode()
-        {
-            Node temp = Head;
-            while(temp.Next != null)
-            {
-                temp = temp.Next;
-            }
-            return temp;
-        }
-    }
-
-    public class Node
-    {
-        public int Value { get; set; }
-        public Node Next { get; set; }
-
-        public Node(int val)
-        {
-            Value = val;
-            Next = null;
-        }
-    }
-
-    class NewLinkedList
-    {
-        public Node Head { get; set; }
-        public int Count { get; set; }
-
-        public void AddAtHead(int value)
-        {
-            var temp = new Node(value);
-            temp.Next = Head;
-            Head = temp;
-            Count++;
-        }
-        public void AddAtTail(int value)
-        {
-           
-            var temp = new Node(value);
-            if(Head == null)
-            {
-                Head = temp;
-                return;
-            }
-            var lastNode = GetLastNode();
-            lastNode.Next = temp;
-            Count++;
-        }
-        public void AddAtIndex(int index, int value)
-        {
-            if (index < 0 || index > Count) return;
-            if (index == 0)
-            {
-                AddAtHead(value);
-                return;
-            }
-            if(index == Count)
-            {
-                AddAtTail(value);
-                return;
-            }
-            var temp = Head;
-            var i = 0;
-            while(i < index - 1)
-            {
-                temp = temp.Next;
-                i++;
-            }
-            var node = new Node(value);
-            node.Next = temp.Next.Next;
-            temp.Next = node;
-        }
-        public void DeleteAtIndex(int index)
-        {
-            if (index < 0 || index > Count) return;
-            var i = 0;
-            var temp = Head;
-            while(i < index - 1)
-            {
-                temp = temp.Next;
-            }
-            temp.Next = temp.Next.Next;
-            Count--;
-        }
-        public int Get(int index)
-        {
-            var i = 0;
-            var temp = Head;
-            while (i < index)
-            {
-                temp = temp.Next;
-            }
-            return temp.Value;
-        }
-        public void Print()
-        {
-            var temp = Head;
-            while (temp.Next !=null)
-            {
-                Console.Write(temp.Value + "; ");
-                temp = temp.Next;
-            }
-            Console.WriteLine(temp.Value + "; ");
-            Console.WriteLine("Count: " + Count);
-        }
-        private Node GetLastNode()
-        {
-            var temp = Head;
-            while(temp.Next !=null)
-            {
-                temp = temp.Next;
-            }
-            return temp;
         }
     }
 }
